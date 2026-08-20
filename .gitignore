@@ -1,0 +1,8 @@
+personalProject/
+├── .idea/          (leave alone)
+├── .venv/          (leave alone)
+├── .env            ← new, your API key goes here
+├── .gitignore       ← new, put my content in here
+├── courses.json
+├── courses_clean.json
+├── Scrape Courses.py

@@ -1,81 +1,79 @@
 """
-scrape_courses.py
+clean_courses.py
 
-Scrapes course data from guide.wisc.edu for one or more subjects.
-Run this locally (not in a sandboxed environment) since it needs real internet access.
+Normalizes the raw scraped course data:
+- strips weird unicode (non-breaking spaces, zero-width spaces)
+- splits "title_raw" into course_code, title
+- pulls credits out of the description if present
+- drops entries with no usable description
 
-Usage:
-    python scrape_courses.py
+Run locally: python clean_courses.py
+Input:  courses.json (from scrape_courses.py)
+Output: courses_clean.json
 """
 
-import requests
-from bs4 import BeautifulSoup
 import json
-import time
+import re
 
-# Add/remove subject codes here. Each maps to a guide.wisc.edu URL slug.
-SUBJECTS = {
-    "COMP SCI": "comp_sci",
-    "STAT": "stat",
-    "MATH": "math",
-}
-
-BASE_URL = "https://guide.wisc.edu/courses/{slug}/"
-HEADERS = {"User-Agent": "Mozilla/5.0 (student project; course data collection)"}
+INPUT_FILE = "courses.json"
+OUTPUT_FILE = "courses_clean.json"
 
 
-def scrape_subject(subject_name, slug):
-    url = BASE_URL.format(slug=slug)
-    print(f"Fetching {url} ...")
-    resp = requests.get(url, headers=HEADERS, timeout=20)
-    resp.raise_for_status()
-    soup = BeautifulSoup(resp.text, "html.parser")
+def normalize_whitespace(text):
+    # Replace non-breaking space and zero-width space with normal space, collapse repeats
+    text = text.replace("\u00a0", " ").replace("\u200b", "")
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
 
-    # NOTE: guide.wisc.edu appears to run on a catalog platform (Acalog-style).
-    # Common class names for this type of site are "courseblock", "courseblocktitle",
-    # and "courseblockdesc". If this doesn't match what you see when you run it,
-    # print(soup.prettify()[:3000]) to inspect the real structure, and send me
-    # a snippet — we'll adjust the selectors together.
-    course_blocks = soup.find_all("div", class_="courseblock")
 
-    if not course_blocks:
-        print(f"  No 'courseblock' divs found for {subject_name}. "
-              f"Dumping first 2000 chars of HTML for inspection:")
-        print(resp.text[:2000])
-        return []
-
-    courses = []
-    for block in course_blocks:
-        title_tag = block.find(class_="courseblocktitle")
-        desc_tag = block.find(class_="courseblockdesc")
-        extra_tag = block.find(class_="courseblockextra") or block.find(class_="cb-extra")
-
-        title_text = title_tag.get_text(" ", strip=True) if title_tag else ""
-        desc_text = desc_tag.get_text(" ", strip=True) if desc_tag else ""
-        extra_text = extra_tag.get_text(" ", strip=True) if extra_tag else ""
-
-        courses.append({
-            "subject": subject_name,
-            "title_raw": title_text,
-            "description": desc_text,
-            "extra": extra_text,
-        })
-
-    print(f"  Found {len(courses)} courses for {subject_name}")
-    return courses
+def split_title(title_raw):
+    """
+    title_raw looks like: 'COMP SCI/MATH 240 — INTRODUCTION TO DISCRETE MATHEMATICS'
+    Split into course_code ('COMP SCI/MATH 240') and title ('Introduction To Discrete Mathematics')
+    """
+    title_raw = normalize_whitespace(title_raw)
+    if "—" in title_raw:
+        code_part, name_part = title_raw.split("—", 1)
+    elif "-" in title_raw:
+        code_part, name_part = title_raw.split("-", 1)
+    else:
+        code_part, name_part = title_raw, ""
+    return code_part.strip(), name_part.strip().title()
 
 
 def main():
-    all_courses = []
-    for subject_name, slug in SUBJECTS.items():
-        courses = scrape_subject(subject_name, slug)
-        all_courses.extend(courses)
-        time.sleep(1)  # be polite to the server
+    with open(INPUT_FILE, encoding="utf-8") as f:
+        raw = json.load(f)
 
-    with open("courses.json", "w", encoding="utf-8") as f:
-        json.dump(all_courses, f, indent=2)
+    cleaned = []
+    skipped = 0
 
-    print(f"\nSaved {len(all_courses)} total courses to courses.json")
+    for c in raw:
+        desc = normalize_whitespace(c.get("description", ""))
+        if not desc:
+            skipped += 1
+            continue
+
+        code, title = split_title(c.get("title_raw", ""))
+        extra = normalize_whitespace(c.get("extra", ""))
+
+        cleaned.append({
+            "subject": c.get("subject", ""),
+            "course_code": code,
+            "title": title,
+            "description": desc,
+            "requisites": extra,
+        })
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(cleaned, f, indent=2)
+
+    print(f"Cleaned {len(cleaned)} courses, skipped {skipped} with no description.")
+    print(f"Saved to {OUTPUT_FILE}")
+
+    # quick sanity check print
+    print("\nSample:")
+    print(json.dumps(cleaned[5], indent=2))
 
 
 if __name__ == "__main__":
