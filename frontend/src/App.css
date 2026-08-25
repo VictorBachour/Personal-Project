@@ -1,0 +1,216 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap");
+
+:root {
+  --cardinal: #c5050c;
+  --cardinal-dark: #9a0308;
+  --cream: #faf7f2;
+  --ink: #1c1a17;
+  --ink-soft: #55504a;
+  --line: #e7e0d6;
+  --card: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 64px 24px 96px;
+  position: relative;
+}
+
+.crest {
+  position: absolute;
+  top: 40px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--cardinal);
+  color: white;
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header {
+  margin-bottom: 40px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cardinal);
+  margin: 0 0 12px;
+}
+
+h1 {
+  font-family: "Fraunces", serif;
+  font-size: 44px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  line-height: 1.1;
+}
+
+.subhead {
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 46ch;
+  margin: 0;
+}
+
+.ask-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ask-form input {
+  flex: 1;
+  padding: 14px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--ink);
+}
+
+.ask-form input:focus {
+  outline: none;
+  border-color: var(--cardinal);
+  box-shadow: 0 0 0 3px rgba(197, 5, 12, 0.12);
+}
+
+.ask-form button {
+  padding: 14px 22px;
+  border: none;
+  border-radius: 10px;
+  background: var(--cardinal);
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ask-form button:hover:not(:disabled) {
+  background: var(--cardinal-dark);
+}
+
+.ask-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 40px;
+}
+
+.sample-chip {
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.sample-chip:hover {
+  border-color: var(--cardinal);
+  color: var(--cardinal);
+}
+
+.error {
+  padding: 16px;
+  border-radius: 10px;
+  background: #fdecec;
+  color: var(--cardinal-dark);
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.result {
+  border-top: 1px solid var(--line);
+  padding-top: 32px;
+}
+
+.answer {
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+}
+
+.sources-label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+
+.source-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+}
+
+.source-code {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  color: var(--cardinal);
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.source-title {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.source-desc {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 34px;
+  }
+  .ask-form {
+    flex-direction: column;
+  }
+}
